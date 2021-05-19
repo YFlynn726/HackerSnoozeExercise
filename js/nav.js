@@ -4,8 +4,7 @@
  * Handling navbar clicks and updating navbar
  */
 
-/** Show main list of all stories when click site name */
-
+//showing all stories and making "hacker-snooze.." a link to get all stories
 function navAllStories(evt) {
   console.debug("navAllStories", evt);
   hidePageComponents();
@@ -14,20 +13,7 @@ function navAllStories(evt) {
 
 $body.on("click", "#nav-all", navAllStories);
 
-// lookover________________________
-
-/** Show login/signup on click on "login" */
-// function navSubmitStoryClick(evt) {
-//   console.debug("navSubmitStoryClick", evt);
-//   hidePageComponents();
-//   $allStoriesList.show();
-//   $submitForm.show();
-// }
-
-// $navSubmitStory.on("click", navSubmitStoryClick);
-
-/** Show favorite stories on click on "favorites" */
-
+//my fav list link
 function navFavoritesClick(evt) {
   console.debug("navFavoritesClick", evt);
   hidePageComponents();
@@ -37,8 +23,7 @@ function navFavoritesClick(evt) {
 
 $body.on("click", "#nav-fav", navFavoritesClick);
 
-/** Show My Stories on clicking "my stories" */
-
+//myStories link
 function navMyStories(evt) {
   console.debug("navMyStories", evt);
 
@@ -50,8 +35,6 @@ function navMyStories(evt) {
 
 $body.on("click", "#nav-myStories", navMyStories);
 
-// look over ________________________________^^^^
-
 function navLoginClick(evt) {
   console.debug("navLoginClick", evt);
   hidePageComponents();
@@ -61,20 +44,17 @@ function navLoginClick(evt) {
 
 $navLogin.on("click", navLoginClick);
 
-/** When a user first logins in, update the navbar to reflect that. */
-
+//updating navbar when user logins
 function updateNavOnLogin() {
   console.debug("updateNavOnLogin");
-  $(".main-nav-links").show();
   $navLogin.hide();
   $navSubmit.show();
-
   $navLogOut.show();
   $navUserProfile.text(`${currentUser.username}`).show();
 }
 
-function navSubmitStory(e) {
-  //e.preventDefault();
+//submit story link
+function navSubmitStory() {
   console.debug("navSubmitStory");
   hidePageComponents();
   $allStoriesList.show();
@@ -83,6 +63,7 @@ function navSubmitStory(e) {
 
 $navSubmit.on("click", navSubmitStory);
 
+//username link
 function myProfile() {
   hidePageComponents();
   $userProfile.show();

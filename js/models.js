@@ -24,7 +24,10 @@ class Story {
 
   getHostName() {
     // UNIMPLEMENTED: complete this function!
-    return new URL(this.url).host;
+    //Creates and returns a URL object referencing the URL
+    //The host property of the URL interface is a USVString containing the hostName; shortens it for display UI purposes in stories.js
+    let url = new URL(this.url).host;
+    return url;
   }
 }
 
@@ -45,11 +48,12 @@ class StoryList {
    *  - returns the StoryList instance.
    */
 
+  //static means we can call the class directly and access the static method
   static async getStories() {
     // Note presence of `static` keyword: this indicates that getStories is
     //  **not** an instance method. Rather, it is a method that is called on the
     //  class directly. Why doesn't it make sense for getStories to be an
-    //  instance method?
+    //  instance method? **because its not unique, its the same for every time is it ran.
 
     // query the /stories endpoint (no auth required)
     const response = await axios({
@@ -74,13 +78,13 @@ class StoryList {
   async addStory(user, { title, author, url }) {
     try {
       const token = user.loginToken;
-      const response = await axios({
+      const res = await axios({
         method: "POST",
         url: `${BASE_URL}/stories`,
         data: { token, story: { title, author, url } },
       });
 
-      const story = new Story(response.data.story);
+      const story = new Story(res.data.story);
       this.stories.unshift(story);
       user.ownStories.unshift(story);
 
@@ -91,6 +95,8 @@ class StoryList {
   }
 
   async removeStory(user, storyId) {
+    console.log(storyId);
+    console.log(user);
     try {
       await axios({
         url: `${BASE_URL}/stories/${storyId}`,
@@ -98,12 +104,19 @@ class StoryList {
         data: { token: user.loginToken },
       });
 
-      // filter out the story whose ID we are removing
+      //basically cleaning out the list of the removed item so only the stories that was not deleted are still saved in array of the object of the user.
+
+      // filter out the story that doesn't match the storyId
       this.stories = this.stories.filter((story) => story.storyId !== storyId);
 
-      // do the same thing for the user's list of stories & their favorites
-      user.ownStories = user.ownStories.filter((s) => s.storyId !== storyId);
-      user.favorites = user.favorites.filter((s) => s.storyId !== storyId);
+      //then filter out ownStories that doesn't match the storyId
+      user.ownStories = user.ownStories.filter(
+        (item) => item.storyId !== storyId
+      );
+      //the same for favorites
+      user.favorites = user.favorites.filter(
+        (item) => item.storyId !== storyId
+      );
     } catch (e) {
       alert("Something went wrong. So sorry");
     }
@@ -222,6 +235,7 @@ class User {
 
   async addFavorite(story) {
     this.favorites.push(story);
+    //the underscore means this is developer indication that this should not be moved.
     await this._addOrRemoveFavorite("add", story);
   }
 
@@ -230,8 +244,11 @@ class User {
     await this._addOrRemoveFavorite("remove", story);
   }
 
-  async _addOrRemoveFavorite(newState, story) {
-    const method = newState === "add" ? "POST" : "DELETE";
+  //the underscore means this is developer indication that this should not be moved. Internal function: will not work if moved because it's user specific data being used.
+  async _addOrRemoveFavorite(userAction, story) {
+    //story is an object of information of that story
+    //userAction is if story is being favorited or not
+    const method = userAction === "add" ? "POST" : "DELETE";
     const token = this.loginToken;
     await axios({
       url: `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
@@ -241,6 +258,7 @@ class User {
   }
 
   isFavorite(story) {
-    return this.favorites.some((s) => s.storyId === story.storyId);
+    //this function is returning true or false using some()"finds an element that passes test" in order to determine heart type; comes back with user info
+    return this.favorites.some((item) => item.storyId === story.storyId);
   }
 }

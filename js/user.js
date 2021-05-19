@@ -21,6 +21,7 @@ async function login(evt) {
   // which we'll make the globally-available, logged-in user.
   currentUser = await User.login(username, password);
 
+  //resetting inputs in the form
   $loginForm.trigger("reset");
 
   saveUserCredentialsInLocalStorage();
@@ -59,6 +60,7 @@ $signupForm.on("submit", signup);
 function logout(evt) {
   console.debug("logout", evt);
   localStorage.clear();
+  //reload() method does the same as the reload button in your browser; refreshes current url
   location.reload();
 }
 
@@ -76,9 +78,11 @@ async function checkForRememberedUser() {
   console.debug("checkForRememberedUser");
   const token = localStorage.getItem("token");
   const username = localStorage.getItem("username");
+  //if return false the call to api will not execute.
   if (!token || !username) return false;
 
   // try to log in with these credentials (will be null if login failed)
+  //calling method in model: making a call to the api
   currentUser = await User.loginViaStoredCredentials(token, username);
 }
 
@@ -123,8 +127,8 @@ function updateUIOnUserLogin() {
 
 function generateUserProfile() {
   console.debug("generateUserProfile");
-
   $("#profile-name").text(currentUser.name);
   $("#profile-username").text(currentUser.username);
+  //slice is being used to avoid date to be shown like this: 2021-05-15T16:41:43.776Z
   $("#profile-account-date").text(currentUser.createdAt.slice(0, 10));
 }

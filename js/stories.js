@@ -20,16 +20,17 @@ async function getAndShowStoriesOnStart() {
  */
 
 function generateStoryMarkup(story, showDeleteBtn = false) {
-  // console.debug("generateStoryMarkup", story);
+  //console.debug("generateStoryMarkup", story);
 
   const hostName = story.getHostName();
 
+  //returns true or false if there is a currentUser because the favorite comp only accessible if logged in
   const showHeart = Boolean(currentUser);
+
   return $(`
       <li id="${story.storyId}">
-      ${showDeleteBtn ? getDeleteBtnHTML() : ""}
-      ${showHeart ? getHeartHTML(story, currentUser) : ""}
-      
+        ${showDeleteBtn ? deleteBtnHTML() : ""}
+        ${showHeart ? heartHTML(story, currentUser) : ""}  
         <a href="${story.url}" target="a_blank" class="story-link">
           ${story.title}
         </a>
@@ -40,18 +41,15 @@ function generateStoryMarkup(story, showDeleteBtn = false) {
     `);
 }
 
-//deletebtn
-function getDeleteBtnHTML() {
+function deleteBtnHTML() {
   return `
   <span class="trash-can">
   <i class = "fas fa-trash-alt"></i>
   </span>`;
 }
 
-//getHeart
-function getHeartHTML(story, user) {
-  console.debug("getheartHTML");
-
+function heartHTML(story, user) {
+  //if comes back true then return fas if not then return hearttype of far.
   const isFavorite = user.isFavorite(story);
   const heartType = isFavorite ? "fas" : "far";
   return `
@@ -92,12 +90,18 @@ function postNewStory() {
       url,
       user,
     };
-    $newStoryform.slideUp("slow");
-    $newStoryform.trigger("reset");
+    if (title.length === 0) {
+      alert("Please enter all information.");
+      return false;
+    } else {
+      $newStoryform.slideUp("slow");
+      $newStoryform.trigger("reset");
 
-    const story = await storyList.addStory(currentUser, newStory);
-    const $story = generateStoryMarkup(story);
-    $allStoriesList.prepend($story);
+      //calling api
+      const story = await storyList.addStory(currentUser, newStory);
+      const $story = generateStoryMarkup(story);
+      $allStoriesList.prepend($story);
+    }
   });
 }
 postNewStory();
@@ -108,8 +112,9 @@ function favStoryList() {
   if (currentUser.favorites.length === 0) {
     $favoritedStories.append("<h5>No favorites added!</h5>");
   } else {
-    // loop through all of users favorites and generate HTML for them
+    //looping array of user favs
     for (let story of currentUser.favorites) {
+      //$ = function that returns a set of elements found in the DOM
       const $story = generateStoryMarkup(story);
       $favoritedStories.append($story);
     }
@@ -117,17 +122,18 @@ function favStoryList() {
 
   $favoritedStories.show();
 }
-async function toggleStoryFavorite(evt) {
+async function toggleStoryFavorite(e) {
   console.debug("toggleStoryFavorite");
 
-  const $tgt = $(evt.target);
+  const $tgt = $(e.target);
   const $closestLi = $tgt.closest("li");
   const storyId = $closestLi.attr("id");
-  const story = storyList.stories.find((s) => s.storyId === storyId);
+  //returns the value of the first element in the provided array that satisfies the provided testing function
+  const story = storyList.stories.find((item) => item.storyId === storyId);
 
-  // see if the story is already favorited (checking by presence of heart)
+  //check if heart is selected already
   if ($tgt.hasClass("fas")) {
-    // currently a favorite: remove from user's fav list and change heart
+    // if so call method to remove story from fav list - calling api
     await currentUser.removeFavorite(story);
     $tgt.closest("i").toggleClass("fas far");
   } else {
@@ -142,13 +148,14 @@ $storiesLists.on("click", ".heart", toggleStoryFavorite);
 function getMyStories() {
   $myStories.empty();
 
-  //loop through curr user stories if none render method on div else render stories with trash can icon next to heart icon
+  //loop through curr user stories if none append h5 to div else render stories with trash can icon next to heart icon
   if (currentUser.ownStories.length === 0) {
     $myStories.append(
       "<h5>No stories added yet! Go agead and add a story. :)</h5>"
     );
   } else {
     for (let story of currentUser.ownStories) {
+      //true refers to trash can
       let $story = generateStoryMarkup(story, true);
       $myStories.append($story);
     }
